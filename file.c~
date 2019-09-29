@@ -267,7 +267,7 @@ void file_init_common()
 	}
 	pthread_mutex_unlock(&mutex_gw_dev_mac);
 	
-	update_gw_bind_mac();
+	update_gw_bin_mac();
 }
 
 void file_init_net(void)
