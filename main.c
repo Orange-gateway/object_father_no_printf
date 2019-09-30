@@ -12,7 +12,7 @@ int main(int argc,char* argv[])
 	umask(0);
 	signal(SIGBUS, handler);
 	memset(gw_version,0,9);
-	memcpy(gw_version,"20190927",strlen("20190927"));
+	memcpy(gw_version,"20190929",strlen("20190929"));
 	printf("gateway_version:%s\n",gw_version);
 	memset(zigbee_channel,0,2);
 	memset(zigbee_id,0,5);

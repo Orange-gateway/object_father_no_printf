@@ -164,7 +164,7 @@ void tcp_server_init(void)
 														memset(pthread_mac,0,13);
 														hex_to_str(my_u_data+15,pthread_mac,6);
 														pthread_mac[12] = '\0';
-														net_fd_zt(client_sockfd,pthread_mac,&inset);
+														net_fd_zt(num_d,pthread_mac,&inset);
 														pth_creat_my(get_status,pthread_mac);
 														free(my_u_data);
 														my_u_data = NULL;

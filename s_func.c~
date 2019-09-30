@@ -913,7 +913,10 @@ void find_mac_and_send(char *dev_mac,uint8_t *final_cmd,int len_of_cmd)
 							if( p->flag && !strcmp(bind_mac->valuestring,p->mac))
 							{
 								if(send_to_son_gw_have(final_cmd,len_of_cmd,p->fd_net) == -1)
+								{
+									printf("have(%d)but send -1\n",p->fd_net);
 									p->flag = 0;
+								}
 								break;
 							}
 							p = p->next;
