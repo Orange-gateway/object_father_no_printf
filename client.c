@@ -86,7 +86,7 @@ void tcp_server_init(void)
 		tmp_inset = inset;
 		memset(r_buff, 0, 1024);
 
-		if (select(100,&tmp_inset,NULL, NULL, NULL) > 0) //选择文件描述符的动作，如果有动作就不阻塞 否则一直阻塞在那.
+		if (select(max_fd,&tmp_inset,NULL, NULL, NULL) > 0) //选择文件描述符的动作，如果有动作就不阻塞 否则一直阻塞在那.
 		{
 			for (num_d = 3; num_d < max_fd; num_d++)
 			{

@@ -463,7 +463,7 @@ void pthread_client_receive(void)
 					replace_character(r_str);
 					
 					if(json_checker(r_str)==0)
-					{
+					{printf("reveive from server : %s\n",r_str);
 						first = time(NULL);
 						pth_creat_my(pthread_u_send,r_str);
 					}

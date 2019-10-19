@@ -181,7 +181,7 @@ void cmd_hw_study_or_complish(char *mac,uint8_t *final_cmd,int flag)//发送至�
 	final_cmd[16] = 0x02;
 }
 
-void cmd_mix_lock(char *mac,char *port,uint8_t *final_cmd)//发送至串口合成命令(开锁控制指令)
+void cmd_mix_lock(char *mac,char *port,char *cmd,uint8_t *final_cmd)//发送至串口合成命令(开锁控制指令)
 {
 	char send_cmd[51];
 	memset(send_cmd,0,51);
@@ -190,6 +190,8 @@ void cmd_mix_lock(char *mac,char *port,uint8_t *final_cmd)//发送至串口合�
 	strcat(send_cmd,"90");
 	strcat(send_cmd,port);
 	strcat(send_cmd,"00000aaa550200000000000000");
+	memcpy(send_cmd+38,cmd+4,2);
+	printf("send locek : (%d)%s\n",(int)strlen(send_cmd),send_cmd);
 	str_to_hex(final_cmd,send_cmd,25);
 }
 
@@ -509,7 +511,7 @@ void dev_com_con(cJSON *root)//无内存泄露问题
 					memset(final_cmd,0,15+len_of_cmd);
 					if(strcmp(dev_type_this->valuestring,"0D0101")==0)
 					{
-						cmd_mix_lock(data_mac->valuestring,data_port->valuestring,final_cmd);
+						cmd_mix_lock(data_mac->valuestring,data_port->valuestring,data_dev_cmd->valuestring,final_cmd);
 						find_mac_and_send(data_mac->valuestring,final_cmd,15+len_of_cmd);
 					}
 					else if(strcmp(dev_type_this->valuestring,"010101")==0)
@@ -8086,6 +8088,7 @@ void up_dev_describe(cJSON *root)//删除列表更新而更新状态列表
 	if(strcmp(delete_data->child->string,"mac")==0)
 	{
 		cJSON *delete_mac = cJSON_GetObjectItem(delete_data,"mac");
+		printf("delete mac : %s\n",delete_mac->valuestring);
 		uint8_t *dev_net_delete = NULL;
 		dev_net_delete = (uint8_t *)malloc(16);
 		memset(dev_net_delete,0,16);
@@ -8970,6 +8973,7 @@ void run_the_scene(char *str_id)
 
 void run_scene_u_triger(char *dev_id,char *status)
 {
+	int scene_triger_flag = 0;
 	pthread_mutex_lock(&mutex_scene);
 	cJSON *scene_list_root = cJSON_Parse(scene_list);//遍历情景列表
 	pthread_mutex_unlock(&mutex_scene);
@@ -9016,6 +9020,7 @@ void run_scene_u_triger(char *dev_id,char *status)
 										memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 										memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 										pth_creat_my(run_the_scene,scene_id_pthread);
+										scene_triger_flag = 1;
 										if(NET_FLAG)
 										{
 											cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9059,6 +9064,7 @@ void run_scene_u_triger(char *dev_id,char *status)
 												memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 												memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 												pth_creat_my(run_the_scene,scene_id_pthread);
+												scene_triger_flag = 1;
 												if(NET_FLAG)
 												{
 													cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9109,6 +9115,7 @@ void run_scene_u_triger(char *dev_id,char *status)
 												memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 												memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 												pth_creat_my(run_the_scene,scene_id_pthread);
+												scene_triger_flag = 1;
 												if(NET_FLAG)
 												{
 													cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9152,6 +9159,7 @@ void run_scene_u_triger(char *dev_id,char *status)
 														memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 														memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 														pth_creat_my(run_the_scene,scene_id_pthread);
+														scene_triger_flag = 1;
 														if(NET_FLAG)
 														{
 															cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9190,9 +9198,10 @@ void run_scene_u_triger(char *dev_id,char *status)
 									}
 								}
 							}
-							break;
 						}
+						if(scene_triger_flag) break;
 					}
+					if(scene_triger_flag) break;
 				}
 			}
 		}
@@ -9202,6 +9211,7 @@ void run_scene_u_triger(char *dev_id,char *status)
 }
 void run_scene_u_triger_sensor(char *dev_id,char *status)
 {
+	int scene_triger_flag = 0;
 	pthread_mutex_lock(&mutex_scene);
 	cJSON *scene_list_root = cJSON_Parse(scene_list);//遍历情景列表
 	pthread_mutex_unlock(&mutex_scene);
@@ -9252,6 +9262,7 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 											memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 											memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 											pth_creat_my(run_the_scene,scene_id_pthread);
+											scene_triger_flag = 1;
 											if(NET_FLAG)
 											{
 												cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9295,6 +9306,7 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 													memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 													memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 													pth_creat_my(run_the_scene,scene_id_pthread);
+													scene_triger_flag = 1;
 													if(NET_FLAG)
 													{
 														cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9345,6 +9357,7 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 													memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 													memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 													pth_creat_my(run_the_scene,scene_id_pthread);
+													scene_triger_flag = 1;
 													if(NET_FLAG)
 													{
 														cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9388,6 +9401,7 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 															memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 															memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 															pth_creat_my(run_the_scene,scene_id_pthread);
+															scene_triger_flag = 1;
 															if(NET_FLAG)
 															{
 																cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9440,6 +9454,7 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 											memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 											memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 											pth_creat_my(run_the_scene,scene_id_pthread);
+											scene_triger_flag = 1;
 											if(NET_FLAG)
 											{
 												cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9483,6 +9498,7 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 													memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 													memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 													pth_creat_my(run_the_scene,scene_id_pthread);
+													scene_triger_flag = 1;
 													if(NET_FLAG)
 													{
 														cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9540,6 +9556,7 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 												memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 												memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 												pth_creat_my(run_the_scene,scene_id_pthread);
+												scene_triger_flag = 1;
 												if(NET_FLAG)
 												{
 													cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9583,6 +9600,7 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 														memset(scene_id_pthread,0,strlen(scene_id_zx->valuestring)+1);
 														memcpy(scene_id_pthread,scene_id_zx->valuestring,strlen(scene_id_zx->valuestring)+1);
 														pth_creat_my(run_the_scene,scene_id_pthread);
+														scene_triger_flag = 1;
 														if(NET_FLAG)
 														{
 															cJSON *push = cJSON_GetObjectItem(scene_for,"is_push");
@@ -9619,9 +9637,10 @@ void run_scene_u_triger_sensor(char *dev_id,char *status)
 									}
 								}
 							}
-							break;
 						}
+						if(scene_triger_flag) break;
 					}
+					if(scene_triger_flag) break;
 				}
 			}
 		}

@@ -834,7 +834,7 @@ int send_to_son_gw_have(uint8_t *data,int len_of_cmd,int net_cd)
 	memcpy(my_send_char,send_char,my_len);
 	strcat(my_send_char,"\n\0");
 	ret_value = (int)send(net_cd,my_send_char,my_len+1,0);
-	printf("send have (%d)\n",net_cd);
+	printf("send have (%d)\n%s",net_cd,my_send_char);
 	cJSON_Delete(root_send);
 	root_send = NULL;
 	free(send_char);
@@ -869,6 +869,7 @@ void send_to_son_gw_no(uint8_t *data,int len_of_cmd)
 		if( p->flag )
 		{
 			ret_value = (int)send(p->fd_net,my_send_char,my_len+1,0);
+			printf("send no(%d)\n%s",p->fd_net,my_send_char);
 			if(ret_value == -1)
 				p->flag = 0;
 		}
