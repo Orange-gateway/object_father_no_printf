@@ -40,4 +40,6 @@ void send_to_son_gw_no(uint8_t *data,int len_of_cmd);
 int send_to_son_gw_have(uint8_t *data,int len_of_cmd,int net_cd);
 void sign_mac_zt(uint8_t *mac);
 int up_sign_mac(uint8_t *data);
+void my_human_file(void);
+void delete_delay_or_human_file(char *delete_mac);
 #endif

@@ -56,6 +56,7 @@ void run_the_scene(char *str_id);
 void run_scene(char *sce_id);
 void run_scene_u_triger(char *dev_id,char *status);
 void run_scene_u_triger_sensor(char *dev_id,char *status);
+void run_scene_u_lock(char *dev_id,char *status);
 void power_65(uint8_t *u_data,int i,int u_data_len,char *u_data_str);
 int scene_time_judge(char *my_time,cJSON *mxid,char *strid);
 int scene_time_NULL(cJSON *mxid,char *strid);
@@ -66,4 +67,5 @@ void gw_bind_self_mac(char *data_str);//绑定主网关mac
 void gw_mac_bind_dev_mac(char *u_data_str);//绑定子网关mac
 void delete_gw_bind_mac(char *del_mac);//删除绑定mac
 void update_gw_bind_mac(void);
+void replace_son_bind_mac(char *new_mac,char *old_mac);
 #endif

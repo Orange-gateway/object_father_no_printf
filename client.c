@@ -85,7 +85,6 @@ void tcp_server_init(void)
 	{
 		tmp_inset = inset;
 		memset(r_buff, 0, 1024);
-
 		if (select(max_fd,&tmp_inset,NULL, NULL, NULL) > 0) //选择文件描述符的动作，如果有动作就不阻塞 否则一直阻塞在那.
 		{
 			for (num_d = 3; num_d < max_fd; num_d++)
@@ -140,9 +139,10 @@ void tcp_server_init(void)
 													uint8_t *my_u_data = NULL;
 													my_u_data =(uint8_t*)malloc(data_len);//解析数据接收缓冲区
 													memset(my_u_data,0,data_len);
-/*													for(i=0;i<data_len;i++)*/
-/*														my_u_data[i]=rc_buff[i];*/
 
+													for(i=0;i<data_len;i++)
+														my_u_data[i]=rc_buff[i];
+/*
 													printf("usart receive is (%d):",num_d);
 													for(i=0;i<data_len;i++)
 													{
@@ -150,7 +150,7 @@ void tcp_server_init(void)
 														printf("%.2x  ",my_u_data[i]);
 													}
 													printf("\n");
-
+*/
 													up_resend(my_u_data);//更新重发列表
 													if( my_u_data[10] == 0xf1)
 													{
@@ -207,7 +207,6 @@ void net_fd_zt(int net_fd,char *mac,fd_set *inset)
 {
 	NET_F *p = NULL,*q = NULL;
 	p  = q = net_head;
-	
 	if(p == NULL)
 	{
 		net_d = (NET_F *)malloc(sizeof(NET_F));

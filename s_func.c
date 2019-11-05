@@ -312,7 +312,6 @@ void create_secret_str(char *str,char *sn,char *mac)
     memcpy(str,char_root,strlen(char_root));
     
     strcat(str,"\n\0");
-
     free(times_tamp);
     times_tamp = NULL;
 
@@ -645,7 +644,8 @@ void pthread_mutex_init_func(void)
 	pthread_mutex_init(&mutex_waite,NULL);
 	pthread_mutex_init(&mutex_room,NULL);
 	pthread_mutex_init(&mutex_gw_dev_mac,NULL);
-	pthread_mutex_init(&mutex_sign_mac,NULL);
+	pthread_mutex_init(&mutex_human,NULL);
+	pthread_mutex_init(&mutex_sign_mac_zt,NULL);
 }
 
 /*********************************************************************************************/
@@ -961,6 +961,7 @@ void sign_mac_zt(uint8_t *mac)
 {
 	SIG_MAC *p = NULL;
 	p = sign_mac_head;
+	pthread_mutex_lock(&mutex_sign_mac_zt);
 	if(p==NULL)
 	{
 		sign_mac_d = (SIG_MAC*)malloc(sizeof(SIG_MAC));
@@ -969,7 +970,6 @@ void sign_mac_zt(uint8_t *mac)
 		sign_mac_d->flag_have = 1;
 		sign_mac_head = sign_mac_z = sign_mac_d;
 		sign_mac_d->next = NULL;
-		return ;
 	}
 	else
 	{
@@ -978,7 +978,7 @@ void sign_mac_zt(uint8_t *mac)
 			if(!mac_and_mac_judge(p,mac+2))
 			{
 				p->flag_have = 1;
-				return;
+				break;
 			}
 			else if(p->next == NULL)
 			{
@@ -988,17 +988,21 @@ void sign_mac_zt(uint8_t *mac)
 				sign_mac_d->flag_have = 1;
 				p->next = sign_mac_d;
 				sign_mac_d->next = NULL;
-				return ;
+				break;
 			}
 			p = p->next;
 		}
 	}
+	pthread_mutex_unlock(&mutex_sign_mac_zt);
+	return;
 }
 int up_sign_mac(uint8_t *data)
 {
 	int ret = 0;
+	if(data[10] == 0x10) return ret;
 	SIG_MAC *p1 = NULL;
 	p1 = sign_mac_head;
+	pthread_mutex_lock(&mutex_sign_mac_zt);
 	while(p1)
 	{
 		if(!mac_and_mac_judge(p1,data+2))
@@ -1012,5 +1016,54 @@ int up_sign_mac(uint8_t *data)
 		}
 		p1 = p1->next;
 	}
+	pthread_mutex_unlock(&mutex_sign_mac_zt);
 	return ret;
+}
+void my_human_file(void)
+{
+	HB *p_human = NULL;
+	p_human = human_head;
+	cJSON *human_root = cJSON_CreateObject();
+	cJSON *human_arr = cJSON_CreateArray();
+	cJSON_AddItemToObject(human_root,"human_list",human_arr);
+	while( p_human )
+	{
+		if( p_human->flag )
+		{
+			cJSON *human_add = cJSON_CreateObject();
+			cJSON_AddStringToObject(human_add,"dev_mac",p_human->mac);
+			cJSON_AddStringToObject(human_add,"dev_port",p_human->port);
+			cJSON_AddStringToObject(human_add,"dev_id",p_human->id);
+			cJSON_AddStringToObject(human_add,"dev_type",p_human->type);
+			cJSON_AddNumberToObject(human_add,"dev_time",p_human->now_time);
+			cJSON_AddItemToArray(human_arr,human_add);
+		}
+		p_human = p_human->next;
+	}
+	char *my_char = cJSON_PrintUnformatted(human_root);
+	int human_file_fd = open("/root/human_list.txt",O_RDWR|O_CREAT|O_TRUNC,0777);
+	write(human_file_fd,my_char,strlen(my_char));
+	fsync(human_file_fd);
+	close(human_file_fd);
+	free(my_char);
+	my_char = NULL;
+	cJSON_Delete(human_root);
+	human_root = NULL;
+}
+void delete_delay_or_human_file(char *delete_mac)
+{
+	HB *p1 = NULL;
+	p1 = human_head;
+	pthread_mutex_lock(&mutex_human);
+	while( p1 )
+	{
+		if(!strcmp(p1->mac,delete_mac))
+		{
+			p1->flag = 0;
+			my_human_file();
+			break;
+		}
+		p1 = p1->next;
+	}
+	pthread_mutex_unlock(&mutex_human);
 }

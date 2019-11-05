@@ -26,9 +26,11 @@
  pthread_mutex_t mutex_down_file;//下载文件锁
  pthread_mutex_t mutex_room;//房间锁
  pthread_mutex_t mutex_gw_dev_mac;//主、子网关绑定锁
+ pthread_mutex_t mutex_resend;//重发互斥锁
+ pthread_mutex_t mutex_human;//人体文件互斥锁
+ pthread_mutex_t mutex_sign_mac_zt;//标记mac锁
  pthread_cond_t cond;
  pthread_mutex_t mutex_waite;//信道等待锁
- pthread_mutex_t mutex_sign_mac;//标记mac锁
  typedef struct resend //重发结构体
  {
  	time_t now_time;//登记现在的时间
@@ -44,6 +46,8 @@
 	time_t now_time;//登记现在的时间
  	char mac[17];
  	char port[3];
+ 	char id[20];
+ 	char type[10];
  	int flag;
  	struct human *next;
  }HB;

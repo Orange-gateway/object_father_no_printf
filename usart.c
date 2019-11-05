@@ -226,8 +226,7 @@ int usart_init(int fd,int baudrate,int flew_ctrl,int databits,int check,int stop
 ********************************/
 int usart_send(int fd, uint8_t *s_buff,int data_len)
 {
- 
-   write(fd,s_buff,data_len);  
-    return 0;
+	write(fd,s_buff,data_len);  
+	return 0;
 }
 
